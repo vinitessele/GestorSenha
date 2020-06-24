@@ -1,0 +1,14 @@
+program GestorDeSenhasVNT;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  UInicial in 'UInicial.pas' {FrmInicial};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TFrmInicial, FrmInicial);
+  Application.Run;
+end.
