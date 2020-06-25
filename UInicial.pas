@@ -3,13 +3,14 @@ unit UInicial;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  System.SysUtils, System.Types, System.UITypes, System.Classes,
+  System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.TabControl,
   FMX.Layouts, FMX.Objects, FMX.Controls.Presentation, FMX.StdCtrls,
   System.Actions, FMX.ActnList, FMX.Edit;
 
 type
-  TFrmInicial = class(TForm)
+  TFInicial = class(TForm)
     layout_rodape: TLayout;
     TabControl1: TTabControl;
     StyleBook1: TStyleBook;
@@ -53,69 +54,138 @@ type
     Rectangle3: TRectangle;
     Label16: TLabel;
     Layout5: TLayout;
-    Edit1: TEdit;
+    EditConfirmaSenha: TEdit;
     Line1: TLine;
     Layout4: TLayout;
-    Edit2: TEdit;
+    EditSenha: TEdit;
     Line2: TLine;
+    TabItem7: TTabItem;
+    Layout6: TLayout;
+    Label9: TLabel;
+    Label17: TLabel;
+    Rectangle4: TRectangle;
+    Label18: TLabel;
+    Layout7: TLayout;
+    EditSenhaEntra: TEdit;
+    Line3: TLine;
+    ActTab7: TChangeTabAction;
+    Image6: TImage;
     procedure Image2Click(Sender: TObject);
     procedure Rectangle1Click(Sender: TObject);
     procedure Label3Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Rectangle2Click(Sender: TObject);
     procedure Rectangle3Click(Sender: TObject);
+    procedure Rectangle4Click(Sender: TObject);
   private
+    procedure AbreFPrincipal;
     { Private declarations }
   public
     { Public declarations }
   end;
 
 var
-  FrmInicial: TFrmInicial;
+  FInicial: TFInicial;
 
 implementation
 
 {$R *.fmx}
 
-uses UPrincipal;
+uses UPrincipal, UDM;
 
-procedure TFrmInicial.FormCreate(Sender: TObject);
+procedure TFInicial.FormCreate(Sender: TObject);
 begin
-    TabControl1.ActiveTab := TabItem1;
+  TabControl1.ActiveTab := TabItem1;
+  dm.FDQlogin.Active := True;
+  dm.FDQlogin.Close;
+  dm.FDQlogin.Open();
+  if dm.FDQlogin.RecordCount > 0 then
+  begin
+    line.Visible := false;
+    layout_rodape.Visible := false;
+    ActTab7.Execute;
+  end;
 end;
 
-procedure TFrmInicial.Image2Click(Sender: TObject);
+procedure TFInicial.Image2Click(Sender: TObject);
 begin
 
-    case TabControl1.TabIndex of
-        0: ActTab2.Execute;
-        1: ActTab3.Execute;
-        2: begin
-            line.Visible := false;
-            layout_rodape.Visible := false;
-            ActTab4.Execute;
-        end;
+  case TabControl1.TabIndex of
+    0:
+      ActTab2.Execute;
+    1:
+      ActTab3.Execute;
+    2:
+      begin
+        line.Visible := false;
+        layout_rodape.Visible := false;
+        ActTab4.Execute;
+      end;
+  end;
+end;
+
+procedure TFInicial.Label3Click(Sender: TObject);
+begin
+  ActTab5.Execute;
+end;
+
+procedure TFInicial.Rectangle1Click(Sender: TObject);
+begin
+  ActTab5.Execute;
+end;
+
+procedure TFInicial.Rectangle2Click(Sender: TObject);
+begin
+  ActTab6.Execute;
+end;
+
+procedure TFInicial.Rectangle3Click(Sender: TObject);
+begin
+  if EditSenha.Text = EditConfirmaSenha.Text then
+  begin
+    dm.FDQlogin.Close;
+    dm.FDQlogin.Open();
+    if dm.FDQlogin.RecordCount = 0 then
+    begin
+      dm.FDQlogin.Append;
+      dm.FDQloginsenha.AsString := EditConfirmaSenha.Text;
+      dm.FDQlogin.Post;
+      dm.FDConnection1.CommitRetaining;
     end;
+    AbreFPrincipal;
+  end
+  else
+  begin
+    ShowMessage('A senha não confere!');
+  end;
 end;
 
-procedure TFrmInicial.Label3Click(Sender: TObject);
+procedure TFInicial.Rectangle4Click(Sender: TObject);
 begin
-    ActTab5.Execute;
+  if dm.FDQloginsenha.AsString = EditSenhaEntra.Text then
+  begin
+    AbreFPrincipal;
+  end
+  else
+  begin
+    ShowMessage('Senha incorreta!');
+  end;
+
 end;
 
-procedure TFrmInicial.Rectangle1Click(Sender: TObject);
+procedure TFInicial.AbreFPrincipal;
 begin
-    ActTab5.Execute;
-end;
 
-procedure TFrmInicial.Rectangle2Click(Sender: TObject);
-begin
-    ActTab6.Execute;
-end;
+  if not Assigned(FPrincipal) then
+    FPrincipal := TFPrincipal.Create(nil);
+  FPrincipal.ShowModal(
+    procedure(ModalResult: TModalResult)
+    begin
+      sleep(500);
+      FPrincipal := nil;
+      FPrincipal.disposeof;
+    end);
 
-procedure TFrmInicial.Rectangle3Click(Sender: TObject);
-begin
-    FrmPrincipal.Show;
 end;
 
 end.

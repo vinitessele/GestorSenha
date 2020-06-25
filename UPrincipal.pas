@@ -11,7 +11,7 @@ uses
   FMX.ScrollBox, FMX.Memo;
 
 type
-  TFrmPrincipal = class(TForm)
+  TFPrincipal = class(TForm)
     rect_toolbar: TRectangle;
     img_busca: TImage;
     img_tab1: TImage;
@@ -20,10 +20,8 @@ type
     Line1: TLine;
     img_tab2: TImage;
     img_tab3: TImage;
-    img_tab4: TImage;
     layout_aba1: TLayout;
     layout_aba2: TLayout;
-    layout_aba4: TLayout;
     layout_aba3: TLayout;
     TabControl: TTabControl;
     StyleBook1: TStyleBook;
@@ -31,7 +29,6 @@ type
     TabItem1: TTabItem;
     TabItem2: TTabItem;
     TabItem3: TTabItem;
-    TabItem4: TTabItem;
     lbl_titulo: TLabel;
     AnimationSelecao: TFloatAnimation;
     rect_abas: TRectangle;
@@ -43,10 +40,8 @@ type
     img_tab1_sel: TImage;
     img_tab2_sel: TImage;
     img_tab3_sel: TImage;
-    img_tab4_sel: TImage;
     lb_password: TListBox;
     lb_card: TListBox;
-    lb_note: TListBox;
     icone_password: TImage;
     icone_card: TImage;
     icone_note: TImage;
@@ -117,7 +112,6 @@ type
     Memo1: TMemo;
     img_sem_senha: TImage;
     img_sem_cartao: TImage;
-    img_sem_notas: TImage;
     img_sem_favorito: TImage;
     img_add: TImage;
     layout_aba5: TLayout;
@@ -150,7 +144,7 @@ type
       cod_item, titulo, descricao: string);
     procedure ListarPassword;
     procedure ListarCard;
-    procedure ListarNote;
+    // procedure ListarNote;
     procedure DetalheItem(const Sender: TCustomListBox;
       const Item: TListBoxItem);
     procedure FecharBusca;
@@ -164,13 +158,15 @@ type
   end;
 
 var
-  FrmPrincipal: TFrmPrincipal;
+  FPrincipal: TFPrincipal;
 
 implementation
 
 {$R *.fmx}
 
-function TFrmPrincipal.RandomPassword(Size: integer;
+uses UDM;
+
+function TFPrincipal.RandomPassword(Size: integer;
   Upper, Digits, SpecialChar: boolean): string;
 
 { max length of generated password }
@@ -203,19 +199,19 @@ begin
     Result := Result + s[Random(Length(s) - 1) + 1];
 end;
 
-procedure TFrmPrincipal.GerarSenha();
+procedure TFPrincipal.GerarSenha();
 begin
   edt_senha.text := RandomPassword(FormatFloat('00', track_tamanho.Value)
     .ToInteger, sw_upper.IsChecked, sw_digits.IsChecked, sw_special.IsChecked);
 end;
 
-procedure TFrmPrincipal.FecharBusca;
+procedure TFPrincipal.FecharBusca;
 begin
   if AnimationBusca.Inverse then
     AnimationBusca.Start;
 end;
 
-procedure TFrmPrincipal.DetalheItem(const Sender: TCustomListBox;
+procedure TFPrincipal.DetalheItem(const Sender: TCustomListBox;
   const Item: TListBoxItem);
 var
   tipo: TTipoItem;
@@ -231,7 +227,7 @@ begin
   layout_gerar_senha.Visible := false;
   lbl_gerar_senha.text := 'Gerar Nova';
 
-  //img_logo.Visible := false;
+  // img_logo.Visible := false;
   img_cancelar.Visible := true;
   img_salvar.Visible := true;
   img_favorito.Align := TAlignLayout.None;
@@ -270,18 +266,17 @@ begin
   ActTabDetalhe.Execute;
 end;
 
-procedure TFrmPrincipal.AnimationBuscaFinish(Sender: TObject);
+procedure TFPrincipal.AnimationBuscaFinish(Sender: TObject);
 begin
   AnimationBusca.Inverse := NOT AnimationBusca.Inverse;
   rect_busca.Visible := AnimationBusca.Inverse;
 end;
 
-procedure TFrmPrincipal.img_cancelarClick(Sender: TObject);
+procedure TFPrincipal.img_cancelarClick(Sender: TObject);
 begin
   img_cancelar.Visible := false;
   img_favorito.Visible := false;
   img_salvar.Visible := false;
-  //img_logo.Visible := true;
   img_busca.Visible := true;
 
 {$IFDEF ANDROID}
@@ -298,14 +293,12 @@ begin
       SelecionaAba(layout_aba2);
     3:
       SelecionaAba(layout_aba3);
-    4:
-      SelecionaAba(layout_aba4);
   end;
 
   img_add.Visible := true;
 end;
 
-procedure TFrmPrincipal.AddFrame(lb: TListBox; icone: TTipoItem;
+procedure TFPrincipal.AddFrame(lb: TListBox; icone: TTipoItem;
   cod_item, titulo, descricao: string);
 var
   Item: TListBoxItem;
@@ -345,7 +338,7 @@ begin
   lb.AddObject(Item);
 end;
 
-procedure TFrmPrincipal.ListarFavorito();
+procedure TFPrincipal.ListarFavorito();
 begin
   img_sem_favorito.Visible := false;
   lb_favorito.Items.Clear;
@@ -364,59 +357,55 @@ begin
   AddFrame(lb_favorito, TTipoItem.Note, '006', 'Nota', 'Notas Gerais');
 end;
 
-procedure TFrmPrincipal.ListarPassword();
+procedure TFPrincipal.ListarPassword();
 begin
   img_sem_senha.Visible := false;
   lb_password.Items.Clear;
   lb_password.OnItemClick := DetalheItem;
 
-  AddFrame(lb_password, TTipoItem.Password, '001', 'Gmail',
-    'heber@99coders.com.br');
-  AddFrame(lb_password, TTipoItem.Password, '002', 'Hotmail',
-    'teste@hotmail.com');
-  AddFrame(lb_password, TTipoItem.Password, '003', 'Yahoo',
-    'heber@yahoo.com.br');
-  AddFrame(lb_password, TTipoItem.Password, '009', 'Yahoo',
-    'heber@yahoo.com.br');
+  dm.FDQsenha.Active := true;
+  dm.FDQsenha.Close;
+  dm.FDQsenha.Open();
+
+  while not dm.FDQsenha.Eof do
+  begin
+    AddFrame(lb_password, TTipoItem.Password, dm.FDQsenhaid.AsString,
+      dm.FDQsenhadescricao.AsString, dm.FDQsenhalogin.text);
+    dm.FDQsenha.Next;
+  end;
+
 end;
 
-procedure TFrmPrincipal.ListarCard();
+procedure TFPrincipal.ListarCard();
 begin
   img_sem_cartao.Visible := false;
   lb_card.Items.Clear;
   lb_card.OnItemClick := DetalheItem;
 
-  AddFrame(lb_card, TTipoItem.Card, '004', 'Nubank', 'XXXX-XXXX-XXXX-5242');
-  AddFrame(lb_card, TTipoItem.Card, '005', 'Visa', 'XXXX-XXXX-XXXX-6855');
-  AddFrame(lb_card, TTipoItem.Card, '008', 'Mastercard', 'XXXX-XXXX-XXXX-4952');
+  dm.FDQCartao.Active := true;
+  dm.FDQCartao.Close;
+  dm.FDQCartao.Open();
+
+  while not dm.FDQCartao.Eof do
+  begin
+    AddFrame(lb_card, TTipoItem.Card, dm.FDQCartaoid.AsString,
+      dm.FDQCartaonome.AsString, dm.FDQCartaonumero.text);
+    dm.FDQCartao.Next;
+  end;
 end;
 
-procedure TFrmPrincipal.ListarNote();
-begin
-  img_sem_notas.Visible := false;
-  lb_note.Items.Clear;
-  lb_note.OnItemClick := DetalheItem;
-
-  AddFrame(lb_note, TTipoItem.Note, '006', 'Nota', 'Lista de compras');
-  AddFrame(lb_note, TTipoItem.Note, '006', 'Nota', 'Minhas anotações');
-  AddFrame(lb_note, TTipoItem.Note, '006', 'Nota', 'Notas Gerais');
-  AddFrame(lb_note, TTipoItem.Note, '007', 'Nota', 'Atividades');
-end;
-
-procedure TFrmPrincipal.SelecionaAba(Sender: TObject);
+procedure TFPrincipal.SelecionaAba(Sender: TObject);
 begin
   rect_selecao.Width := layout_aba1.Width;
 
   img_tab1_sel.Visible := false;
   img_tab2_sel.Visible := false;
   img_tab3_sel.Visible := false;
-  img_tab4_sel.Visible := false;
   img_tab5_sel.Visible := false;
 
   img_tab1.Visible := true;
   img_tab2.Visible := true;
   img_tab3.Visible := true;
-  img_tab4.Visible := true;
   img_tab5.Visible := true;
 
   img_add.Visible := true;
@@ -448,14 +437,6 @@ begin
     ActTab3.Execute;
   end;
 
-  if TLayout(Sender).Tag = 4 then
-  begin
-    lbl_titulo.text := 'Notas';
-    img_tab4_sel.Visible := true;
-    img_tab4.Visible := false;
-    ActTab4.Execute;
-  end;
-
   if TLayout(Sender).Tag = 5 then
   begin
     img_add.Visible := false;
@@ -467,19 +448,19 @@ begin
 
 end;
 
-procedure TFrmPrincipal.sw_upperClick(Sender: TObject);
+procedure TFPrincipal.sw_upperClick(Sender: TObject);
 begin
   GerarSenha;
 end;
 
-procedure TFrmPrincipal.track_tamanhoChange(Sender: TObject);
+procedure TFPrincipal.track_tamanhoChange(Sender: TObject);
 begin
   lbl_texto_tamanho.text := 'Número de caracteres: ' +
     FormatFloat('00', track_tamanho.Value);
   GerarSenha;
 end;
 
-procedure TFrmPrincipal.FormCreate(Sender: TObject);
+procedure TFPrincipal.FormCreate(Sender: TObject);
 begin
   // Esconde icones...
   icone_password.Visible := false;
@@ -507,15 +488,14 @@ begin
 {$ENDIF}
 end;
 
-procedure TFrmPrincipal.img_addClick(Sender: TObject);
+procedure TFPrincipal.img_addClick(Sender: TObject);
 begin
   ListarFavorito;
   ListarPassword;
   ListarCard;
-  ListarNote;
 end;
 
-procedure TFrmPrincipal.img_buscaClick(Sender: TObject);
+procedure TFPrincipal.img_buscaClick(Sender: TObject);
 begin
   rect_busca.Width := rect_toolbar.Width;
   rect_busca.Position.Y := 0;
@@ -528,22 +508,22 @@ begin
   AnimationBusca.Start;
 end;
 
-procedure TFrmPrincipal.img_cancel_buscaClick(Sender: TObject);
+procedure TFPrincipal.img_cancel_buscaClick(Sender: TObject);
 begin
   FecharBusca;
 end;
 
-procedure TFrmPrincipal.img_refresh_senhaClick(Sender: TObject);
+procedure TFPrincipal.img_refresh_senhaClick(Sender: TObject);
 begin
   GerarSenha;
 end;
 
-procedure TFrmPrincipal.layout_aba1Click(Sender: TObject);
+procedure TFPrincipal.layout_aba1Click(Sender: TObject);
 begin
   SelecionaAba(Sender);
 end;
 
-procedure TFrmPrincipal.lbl_gerar_senhaClick(Sender: TObject);
+procedure TFPrincipal.lbl_gerar_senhaClick(Sender: TObject);
 begin
   if lbl_gerar_senha.text = 'Gerar Nova' then
   begin
