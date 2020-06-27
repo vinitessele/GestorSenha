@@ -23,11 +23,16 @@ type
     FDQCartaoid: TFDAutoIncField;
     FDQCartaonome: TStringField;
     FDQCartaonumero: TStringField;
-    FDQCartaodatavalida: TDateField;
     FDQCartaocvv: TIntegerField;
     FDQsenhafavorito: TStringField;
     FDQsenhalogin: TStringField;
     FDQCartaofavorito: TStringField;
+    FDQFavoritos: TFDQuery;
+    FDQFavoritosid: TFDAutoIncField;
+    FDQFavoritosdescricao: TStringField;
+    FDQFavoritoslogin: TStringField;
+    FDQFavoritostipo: TLargeintField;
+    FDQCartaodatavalida: TStringField;
     procedure FDConnection1BeforeConnect(Sender: TObject);
     procedure FDConnection1AfterConnect(Sender: TObject);
   private
@@ -59,7 +64,7 @@ begin
     ' id integer not null primary key autoincrement, ' + //
     ' nome varchar(30) not null, ' + //
     ' numero varchar(16) not null,   ' + //
-    ' datavalida date not null, ' + //
+    ' datavalida char(7) not null, ' + //
     ' cvv integer not null,' + //
     ' favorito char(1)) ';
   FDConnection1.ExecSQL(strSQL);

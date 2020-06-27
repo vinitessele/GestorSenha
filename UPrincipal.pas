@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants,
+  System.Variants, Data.Db,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   FMX.Layouts, FMX.TabControl, FMX.ListBox, FMX.Controls.Presentation,
   FMX.StdCtrls, FMX.Ani, System.Actions, FMX.ActnList, UFrame, FMX.Edit,
@@ -44,7 +44,6 @@ type
     lb_card: TListBox;
     icone_password: TImage;
     icone_card: TImage;
-    icone_note: TImage;
     TabDetalhe: TTabItem;
     ActTabDetalhe: TChangeTabAction;
     img_cancelar: TImage;
@@ -54,19 +53,19 @@ type
     AnimationBusca: TFloatAnimation;
     RoundRect1: TRoundRect;
     layout_cad_senha: TLayout;
-    Edit1: TEdit;
+    EditDescricao: TEdit;
     Layout3: TLayout;
     Line3: TLine;
     Label3: TLabel;
     Layout4: TLayout;
-    edt_senha: TEdit;
+    editSenha: TEdit;
     Line7: TLine;
     Label4: TLabel;
     Layout5: TLayout;
     img_exibir: TImage;
     img_esconder: TImage;
     Layout6: TLayout;
-    Edit3: TEdit;
+    EditLogin: TEdit;
     Line8: TLine;
     Label7: TLabel;
     img_salvar: TImage;
@@ -86,34 +85,25 @@ type
     img_favorito: TImage;
     layout_cad_cartao: TLayout;
     Layout9: TLayout;
-    Edit2: TEdit;
+    EditNum: TEdit;
     Line13: TLine;
     Label12: TLabel;
     Layout13: TLayout;
-    Edit5: TEdit;
+    EditNome: TEdit;
     Line20: TLine;
     Label30: TLabel;
     Layout1: TLayout;
     Layout10: TLayout;
-    Edit4: TEdit;
+    EditVencimento: TEdit;
     Line16: TLine;
     Label24: TLabel;
     Layout11: TLayout;
-    Edit6: TEdit;
+    EditCVV: TEdit;
     Line21: TLine;
     Label29: TLabel;
-    layout_cad_nota: TLayout;
-    Layout14: TLayout;
-    Edit7: TEdit;
-    Line22: TLine;
-    Label37: TLabel;
-    Layout15: TLayout;
-    Label38: TLabel;
-    Memo1: TMemo;
     img_sem_senha: TImage;
     img_sem_cartao: TImage;
     img_sem_favorito: TImage;
-    img_add: TImage;
     layout_aba5: TLayout;
     img_tab5_sel: TImage;
     img_tab5: TImage;
@@ -126,6 +116,9 @@ type
     LabelFavoritos: TLabel;
     Label2: TLabel;
     Label5: TLabel;
+    img_addSenha: TImage;
+    Img_favoritoSel: TImage;
+    Img_addCartao: TImage;
     procedure layout_aba1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure img_cancelarClick(Sender: TObject);
@@ -136,7 +129,16 @@ type
     procedure lbl_gerar_senhaClick(Sender: TObject);
     procedure sw_upperClick(Sender: TObject);
     procedure img_refresh_senhaClick(Sender: TObject);
-    procedure img_addClick(Sender: TObject);
+    procedure img_esconderClick(Sender: TObject);
+    procedure img_exibirClick(Sender: TObject);
+    procedure img_sem_favoritoClick(Sender: TObject);
+    procedure img_sem_senhaClick(Sender: TObject);
+    procedure img_sem_cartaoClick(Sender: TObject);
+    procedure img_addSenhaClick(Sender: TObject);
+    procedure img_salvarClick(Sender: TObject);
+    procedure img_favoritoClick(Sender: TObject);
+    procedure Img_favoritoSelClick(Sender: TObject);
+    procedure Img_addCartaoClick(Sender: TObject);
   private
     procedure SelecionaAba(Sender: TObject);
     procedure ListarFavorito;
@@ -201,8 +203,53 @@ end;
 
 procedure TFPrincipal.GerarSenha();
 begin
-  edt_senha.text := RandomPassword(FormatFloat('00', track_tamanho.Value)
+  editSenha.text := RandomPassword(FormatFloat('00', track_tamanho.Value)
     .ToInteger, sw_upper.IsChecked, sw_digits.IsChecked, sw_special.IsChecked);
+end;
+
+procedure TFPrincipal.Img_addCartaoClick(Sender: TObject);
+begin
+  img_sem_cartao.Visible := false;
+  // Aguarda aba que estava selecionada...
+  ActTabDetalhe.Tag := TabControl.TabIndex + 1;
+  // Soma +1 porque o index comeca em zero
+
+  // Esconde a busca caso esteja aberta...
+  FecharBusca;
+
+  // Esconde painel de gerar senha aleatoria...
+  layout_gerar_senha.Visible := false;
+  lbl_gerar_senha.text := 'Gerar Nova';
+
+  // img_logo.Visible := false;
+  img_cancelar.Visible := true;
+  img_salvar.Visible := true;
+  img_favorito.Align := TAlignLayout.None;
+  img_favorito.Align := TAlignLayout.Right;
+  Img_favoritoSel.Align := TAlignLayout.None;
+  Img_favoritoSel.Align := TAlignLayout.Right;
+  img_favorito.Visible := true;
+  Img_favoritoSel.Visible := false;
+  img_busca.Visible := false;
+  layout_cad_senha.Visible := false;
+  layout_cad_cartao.Visible := false;
+
+  lbl_titulo.text := 'Inserir Cartão';
+  layout_cad_cartao.Visible := true;
+  EditNome.text := EmptyStr;
+  EditNum.text := EmptyStr;
+  EditVencimento.text := EmptyStr;
+  EditCVV.text := EmptyStr;
+  dm.FDQCartao.Append;
+
+{$IFDEF ANDROID}
+  TAnimator.AnimateFloat(rect_abas, 'Margins.Top', -51, 0.2, TAnimationType.&In,
+    TInterpolationType.Circular);
+{$ELSE}
+  TAnimator.AnimateFloat(rect_abas, 'Margins.Bottom', -60, 0.2,
+    TAnimationType.&In, TInterpolationType.Circular);
+{$ENDIF]}
+  ActTabDetalhe.Execute;
 end;
 
 procedure TFPrincipal.FecharBusca;
@@ -233,27 +280,30 @@ begin
   img_favorito.Align := TAlignLayout.None;
   img_favorito.Align := TAlignLayout.Right;
   img_favorito.Visible := true;
+  Img_favoritoSel.Align := TAlignLayout.None;
+  Img_favoritoSel.Align := TAlignLayout.Right;
+  Img_favoritoSel.Visible := false;
   img_busca.Visible := false;
-  img_add.Visible := false;
 
   layout_cad_senha.Visible := false;
   layout_cad_cartao.Visible := false;
-  layout_cad_nota.Visible := false;
 
   if Item.Tag = 1 then
   begin
     lbl_titulo.text := 'Editar Senha';
     layout_cad_senha.Visible := true;
+    EditDescricao.text := dm.FDQsenhadescricao.AsString;
+    EditLogin.text := dm.FDQsenhalogin.AsString;
+    editSenha.text := dm.FDQsenhasenha.AsString;
   end
   else if Item.Tag = 2 then
   begin
     lbl_titulo.text := 'Editar Cartão';
     layout_cad_cartao.Visible := true;
-  end
-  else
-  begin
-    lbl_titulo.text := 'Editar Nota';
-    layout_cad_nota.Visible := true;
+    EditNum.text := dm.FDQCartaonumero.AsString;
+    EditNome.text := dm.FDQCartaonome.AsString;
+    EditVencimento.text := dm.FDQCartaodatavalida.AsString;
+    EditCVV.text := dm.FDQCartaocvv.AsString;
   end;
 
 {$IFDEF ANDROID}
@@ -276,9 +326,12 @@ procedure TFPrincipal.img_cancelarClick(Sender: TObject);
 begin
   img_cancelar.Visible := false;
   img_favorito.Visible := false;
+  Img_favoritoSel.Visible := false;
   img_salvar.Visible := false;
   img_busca.Visible := true;
-
+  ListarPassword;
+  ListarCard;
+  ListarFavorito;
 {$IFDEF ANDROID}
   TAnimator.AnimateFloat(rect_abas, 'Margins.Top', 0, 0.2, TAnimationType.&In,
     TInterpolationType.Circular);
@@ -295,7 +348,6 @@ begin
       SelecionaAba(layout_aba3);
   end;
 
-  img_add.Visible := true;
 end;
 
 procedure TFPrincipal.AddFrame(lb: TListBox; icone: TTipoItem;
@@ -328,11 +380,6 @@ begin
   begin
     f.img_icone.Bitmap := icone_card.Bitmap;
     Item.Tag := 2; // Armazena o tipo do tem na TAG
-  end
-  else
-  begin
-    f.img_icone.Bitmap := icone_note.Bitmap;
-    Item.Tag := 3; // Armazena o tipo do tem na TAG
   end;
 
   lb.AddObject(Item);
@@ -343,18 +390,25 @@ begin
   img_sem_favorito.Visible := false;
   lb_favorito.Items.Clear;
   lb_favorito.OnItemClick := DetalheItem;
+  dm.FDQFavoritos.Close;
+  dm.FDQFavoritos.Open();
 
-  AddFrame(lb_favorito, TTipoItem.Password, '001', 'Gmail',
-    'heber@99coders.com.br');
-  AddFrame(lb_favorito, TTipoItem.Password, '002', 'Hotmail',
-    'teste@hotmail.com');
-  AddFrame(lb_favorito, TTipoItem.Password, '003', 'Yahoo',
-    'heber@yahoo.com.br');
-  AddFrame(lb_favorito, TTipoItem.Card, '004', 'Nubank', 'XXXX-XXXX-XXXX-5242');
-  AddFrame(lb_favorito, TTipoItem.Card, '005', 'Visa', 'XXXX-XXXX-XXXX-6855');
-  AddFrame(lb_favorito, TTipoItem.Note, '006', 'Nota', 'Lista de compras');
-  AddFrame(lb_favorito, TTipoItem.Note, '006', 'Nota', 'Minhas anotações');
-  AddFrame(lb_favorito, TTipoItem.Note, '006', 'Nota', 'Notas Gerais');
+  while not dm.FDQFavoritos.Eof do
+  begin
+    if dm.FDQFavoritostipo.AsInteger = 1 then
+    begin
+      AddFrame(lb_favorito, TTipoItem.Password, dm.FDQFavoritosid.AsString,
+        dm.FDQFavoritosdescricao.AsString, dm.FDQFavoritoslogin.AsString);
+    end
+    else if dm.FDQFavoritostipo.AsInteger = 2 then
+    begin
+      AddFrame(lb_favorito, TTipoItem.Card, dm.FDQFavoritosid.AsString,
+        dm.FDQFavoritosdescricao.AsString, dm.FDQFavoritoslogin.AsString);
+    end;
+
+    dm.FDQFavoritos.Next;
+  end;
+
 end;
 
 procedure TFPrincipal.ListarPassword();
@@ -363,7 +417,6 @@ begin
   lb_password.Items.Clear;
   lb_password.OnItemClick := DetalheItem;
 
-  dm.FDQsenha.Active := true;
   dm.FDQsenha.Close;
   dm.FDQsenha.Open();
 
@@ -382,7 +435,6 @@ begin
   lb_card.Items.Clear;
   lb_card.OnItemClick := DetalheItem;
 
-  dm.FDQCartao.Active := true;
   dm.FDQCartao.Close;
   dm.FDQCartao.Open();
 
@@ -407,8 +459,6 @@ begin
   img_tab2.Visible := true;
   img_tab3.Visible := true;
   img_tab5.Visible := true;
-
-  img_add.Visible := true;
 
   AnimationSelecao.StopValue := TLayout(Sender).Position.X;
   AnimationSelecao.Start;
@@ -439,7 +489,6 @@ begin
 
   if TLayout(Sender).Tag = 5 then
   begin
-    img_add.Visible := false;
     lbl_titulo.text := 'Configurações';
     img_tab5_sel.Visible := true;
     img_tab5.Visible := false;
@@ -462,12 +511,15 @@ end;
 
 procedure TFPrincipal.FormCreate(Sender: TObject);
 begin
+  dm.FDQFavoritos.Active := true;
+  dm.FDQCartao.Active := true;
+  dm.FDQsenha.Active := true;
   // Esconde icones...
   icone_password.Visible := false;
   icone_card.Visible := false;
-  icone_note.Visible := false;
   img_cancelar.Visible := false;
   img_favorito.Visible := false;
+  Img_favoritoSel.Visible := false;
   img_salvar.Visible := false;
   rect_busca.Visible := false;
 
@@ -481,18 +533,55 @@ begin
 {$IFDEF ANDROID}
   rect_abas.Align := TAlignLayout.Top;
   layout_slide.Align := TAlignLayout.Bottom;
-  img_add.Position.Y := img_add.Position.Y + 50;
+  //img_add.Position.Y := img_add.Position.Y + 50;
 {$ELSE}
   rect_abas.Align := TAlignLayout.Bottom;
   layout_slide.Align := TAlignLayout.Top;
 {$ENDIF}
 end;
 
-procedure TFPrincipal.img_addClick(Sender: TObject);
+procedure TFPrincipal.img_addSenhaClick(Sender: TObject);
 begin
-  ListarFavorito;
-  ListarPassword;
-  ListarCard;
+  img_sem_senha.Visible := false;
+  // Aguarda aba que estava selecionada...
+  ActTabDetalhe.Tag := TabControl.TabIndex + 1;
+  // Soma +1 porque o index comeca em zero
+
+  // Esconde a busca caso esteja aberta...
+  FecharBusca;
+
+  // Esconde painel de gerar senha aleatoria...
+  layout_gerar_senha.Visible := false;
+  lbl_gerar_senha.text := 'Gerar Nova';
+
+  // img_logo.Visible := false;
+  img_cancelar.Visible := true;
+  img_salvar.Visible := true;
+  img_favorito.Align := TAlignLayout.None;
+  img_favorito.Align := TAlignLayout.Right;
+  Img_favoritoSel.Align := TAlignLayout.None;
+  Img_favoritoSel.Align := TAlignLayout.Right;
+  img_favorito.Visible := true;
+  Img_favoritoSel.Visible := false;
+  img_busca.Visible := false;
+  layout_cad_senha.Visible := false;
+  layout_cad_cartao.Visible := false;
+
+  lbl_titulo.text := 'Inserir Senha';
+  layout_cad_senha.Visible := true;
+  EditDescricao.text := EmptyStr;
+  EditLogin.text := EmptyStr;
+  editSenha.text := EmptyStr;
+  dm.FDQsenha.Append;
+
+{$IFDEF ANDROID}
+  TAnimator.AnimateFloat(rect_abas, 'Margins.Top', -51, 0.2, TAnimationType.&In,
+    TInterpolationType.Circular);
+{$ELSE}
+  TAnimator.AnimateFloat(rect_abas, 'Margins.Bottom', -60, 0.2,
+    TAnimationType.&In, TInterpolationType.Circular);
+{$ENDIF]}
+  ActTabDetalhe.Execute;
 end;
 
 procedure TFPrincipal.img_buscaClick(Sender: TObject);
@@ -513,9 +602,186 @@ begin
   FecharBusca;
 end;
 
+procedure TFPrincipal.img_esconderClick(Sender: TObject);
+begin
+  if img_esconder.Visible then
+  begin
+    img_esconder.Visible := false;
+    img_exibir.Visible := true;
+    editSenha.Password := false;
+  end
+  else
+  begin
+    img_esconder.Visible := true;
+    img_exibir.Visible := false;
+    editSenha.Password := true;
+  end;
+end;
+
+procedure TFPrincipal.img_exibirClick(Sender: TObject);
+begin
+  if img_exibir.Visible then
+  begin
+    img_exibir.Visible := false;
+    img_esconder.Visible := true;
+    editSenha.Password := true;
+  end
+  else
+  begin
+    img_exibir.Visible := true;
+    img_esconder.Visible := false;
+    editSenha.Password := false;
+  end;
+end;
+
+procedure TFPrincipal.img_favoritoClick(Sender: TObject);
+begin
+  if img_favorito.Visible then
+  begin
+    Img_favoritoSel.Visible := true;
+    Img_favoritoSel.Align := TAlignLayout.None;
+    Img_favoritoSel.Align := TAlignLayout.Right;
+    img_favorito.Visible := false;
+
+  end
+  else
+  begin
+    img_favorito.Align := TAlignLayout.None;
+    img_favorito.Align := TAlignLayout.Right;
+    img_favorito.Visible := true;
+    Img_favoritoSel.Visible := false;
+  end;
+end;
+
+procedure TFPrincipal.Img_favoritoSelClick(Sender: TObject);
+begin
+  if Img_favoritoSel.Visible then
+  begin
+    img_favorito.Align := TAlignLayout.None;
+    img_favorito.Align := TAlignLayout.Right;
+    Img_favoritoSel.Align := TAlignLayout.None;
+    Img_favoritoSel.Align := TAlignLayout.Right;
+    img_favorito.Visible := true;
+    Img_favoritoSel.Visible := false;
+  end
+  else
+  begin
+    img_favorito.Align := TAlignLayout.None;
+    img_favorito.Align := TAlignLayout.Right;
+    Img_favoritoSel.Align := TAlignLayout.None;
+    Img_favoritoSel.Align := TAlignLayout.Right;
+    img_favorito.Visible := false;
+    Img_favoritoSel.Visible := true;
+  end;
+end;
+
 procedure TFPrincipal.img_refresh_senhaClick(Sender: TObject);
 begin
   GerarSenha;
+end;
+
+procedure TFPrincipal.img_salvarClick(Sender: TObject);
+begin
+  if dm.FDQsenha.State in [dsInsert, dsEdit] then
+  begin
+    if editSenha.text = EmptyStr then
+    begin
+      ShowMessage('Senha não informada');
+      Abort;
+    end;
+    if EditLogin.text = EmptyStr then
+    begin
+      ShowMessage('login não informada');
+      Abort;
+    end;
+    dm.FDQsenhadescricao.AsString := EditDescricao.text;
+    dm.FDQsenhalogin.AsString := EditLogin.text;
+    dm.FDQsenhasenha.AsString := editSenha.text;
+    if Img_favoritoSel.Visible then
+      dm.FDQsenhafavorito.AsString := 'S'
+    else
+      dm.FDQsenhafavorito.AsString := EmptyStr;
+
+    dm.FDQsenha.Post;
+    dm.FDConnection1.CommitRetaining;
+    ShowMessage('Salvo com sucesso!');
+  end;
+
+  if dm.FDQCartao.State in [dsInsert, dsEdit] then
+  begin
+    if EditNome.text = EmptyStr then
+    begin
+      ShowMessage('Nome não informada');
+      Abort;
+    end;
+    if EditNum.text = EmptyStr then
+    begin
+      ShowMessage('Número não informada');
+      Abort;
+    end;
+    if EditVencimento.text = EmptyStr then
+    begin
+      ShowMessage('validade não informada');
+      Abort;
+    end;
+    if EditCVV.text = EmptyStr then
+    begin
+      ShowMessage('CVV não informada');
+      Abort;
+    end;
+
+    dm.FDQCartaonome.AsString := EditNome.text;
+    dm.FDQCartaonumero.AsString := EditNum.text;
+    dm.FDQCartaodatavalida.AsString := EditVencimento.text;
+    dm.FDQCartaocvv.AsInteger := StrToInt(EditCVV.text);
+    if Img_favoritoSel.Visible then
+      dm.FDQcartaofavorito.AsString := 'S'
+    else
+      dm.FDQcartaofavorito.AsString := EmptyStr;
+
+    dm.FDQCartao.Post;
+    dm.FDConnection1.CommitRetaining;
+    ShowMessage('Salvo com sucesso!');
+  end;
+  img_cancelar.Visible := false;
+  img_favorito.Visible := false;
+  Img_favoritoSel.Visible := false;
+  img_salvar.Visible := false;
+  img_busca.Visible := true;
+  img_sem_senha.Visible := true;
+  ListarPassword;
+  ListarFavorito;
+  ListarCard;
+{$IFDEF ANDROID}
+  TAnimator.AnimateFloat(rect_abas, 'Margins.Top', 0, 0.2, TAnimationType.&In,
+    TInterpolationType.Circular);
+{$ELSE}
+  TAnimator.AnimateFloat(rect_abas, 'Margins.Bottom', 0, 0.2,
+    TAnimationType.&In, TInterpolationType.Circular);
+{$ENDIF}
+  case ActTabDetalhe.Tag of
+    1:
+      SelecionaAba(layout_aba1);
+    2:
+      SelecionaAba(layout_aba2);
+    3:
+      SelecionaAba(layout_aba3);
+  end;
+end;
+
+procedure TFPrincipal.img_sem_cartaoClick(Sender: TObject);
+begin
+  ListarCard;
+end;
+
+procedure TFPrincipal.img_sem_favoritoClick(Sender: TObject);
+begin
+  ListarFavorito;
+end;
+
+procedure TFPrincipal.img_sem_senhaClick(Sender: TObject);
+begin
+  ListarPassword;
 end;
 
 procedure TFPrincipal.layout_aba1Click(Sender: TObject);

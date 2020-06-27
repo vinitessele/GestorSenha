@@ -88,11 +88,6 @@ object DM: TDM
       Required = True
       Size = 16
     end
-    object FDQCartaodatavalida: TDateField
-      FieldName = 'datavalida'
-      Origin = 'datavalida'
-      Required = True
-    end
     object FDQCartaocvv: TIntegerField
       FieldName = 'cvv'
       Required = True
@@ -102,6 +97,52 @@ object DM: TDM
       Origin = 'favorito'
       FixedChar = True
       Size = 1
+    end
+    object FDQCartaodatavalida: TStringField
+      FieldName = 'datavalida'
+      Origin = 'datavalida'
+      Required = True
+      FixedChar = True
+      Size = 7
+    end
+  end
+  object FDQFavoritos: TFDQuery
+    Connection = FDConnection1
+    SQL.Strings = (
+      
+        'select 1 as tipo, senha.id, descricao, login, favorito from senh' +
+        'a '
+      'where favorito = '#39'S'#39
+      'union'
+      
+        'select 2  as tipo, cartao.id, nome, numero, favorito from cartao' +
+        ' '
+      'where favorito = '#39'S'#39)
+    Left = 88
+    Top = 104
+    object FDQFavoritosid: TFDAutoIncField
+      FieldName = 'id'
+      Origin = 'id'
+      ProviderFlags = [pfInWhere, pfInKey]
+      ReadOnly = True
+    end
+    object FDQFavoritosdescricao: TStringField
+      FieldName = 'descricao'
+      Origin = 'descricao'
+      Required = True
+      Size = 30
+    end
+    object FDQFavoritoslogin: TStringField
+      FieldName = 'login'
+      Origin = 'login'
+      Size = 50
+    end
+    object FDQFavoritostipo: TLargeintField
+      AutoGenerateValue = arDefault
+      FieldName = 'tipo'
+      Origin = 'tipo'
+      ProviderFlags = []
+      ReadOnly = True
     end
   end
 end
