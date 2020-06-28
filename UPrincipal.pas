@@ -13,7 +13,6 @@ uses
 type
   TFPrincipal = class(TForm)
     rect_toolbar: TRectangle;
-    img_busca: TImage;
     img_tab1: TImage;
     layout_slide: TLayout;
     rect_selecao: TRectangle;
@@ -47,11 +46,6 @@ type
     TabDetalhe: TTabItem;
     ActTabDetalhe: TChangeTabAction;
     img_cancelar: TImage;
-    rect_busca: TRectangle;
-    edt_busca: TEdit;
-    img_cancel_busca: TImage;
-    AnimationBusca: TFloatAnimation;
-    RoundRect1: TRoundRect;
     layout_cad_senha: TLayout;
     EditDescricao: TEdit;
     Layout3: TLayout;
@@ -109,9 +103,9 @@ type
     img_tab5: TImage;
     ActTab5: TChangeTabAction;
     TabItem5: TTabItem;
-    Rectangle3: TRectangle;
+    RectAlterarSenha: TRectangle;
     Label16: TLabel;
-    Rectangle1: TRectangle;
+    RectDecontar: TRectangle;
     Label1: TLabel;
     LabelFavoritos: TLabel;
     Label2: TLabel;
@@ -119,12 +113,17 @@ type
     img_addSenha: TImage;
     Img_favoritoSel: TImage;
     Img_addCartao: TImage;
+    LayoutAlterarSenha: TLayout;
+    Layout14: TLayout;
+    EditSenhaAlterar: TEdit;
+    Line4: TLine;
+    Label8: TLabel;
+    Layout15: TLayout;
+    img_exibir1: TImage;
+    img_esconder1: TImage;
     procedure layout_aba1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure img_cancelarClick(Sender: TObject);
-    procedure img_buscaClick(Sender: TObject);
-    procedure img_cancel_buscaClick(Sender: TObject);
-    procedure AnimationBuscaFinish(Sender: TObject);
     procedure track_tamanhoChange(Sender: TObject);
     procedure lbl_gerar_senhaClick(Sender: TObject);
     procedure sw_upperClick(Sender: TObject);
@@ -139,6 +138,10 @@ type
     procedure img_favoritoClick(Sender: TObject);
     procedure Img_favoritoSelClick(Sender: TObject);
     procedure Img_addCartaoClick(Sender: TObject);
+    procedure RectDecontarClick(Sender: TObject);
+    procedure img_esconder1Click(Sender: TObject);
+    procedure img_exibir1Click(Sender: TObject);
+    procedure RectAlterarSenhaClick(Sender: TObject);
   private
     procedure SelecionaAba(Sender: TObject);
     procedure ListarFavorito;
@@ -146,10 +149,8 @@ type
       cod_item, titulo, descricao: string);
     procedure ListarPassword;
     procedure ListarCard;
-    // procedure ListarNote;
     procedure DetalheItem(const Sender: TCustomListBox;
       const Item: TListBoxItem);
-    procedure FecharBusca;
     function RandomPassword(Size: integer;
       Upper, Digits, SpecialChar: boolean): string;
     procedure GerarSenha;
@@ -201,10 +202,57 @@ begin
     Result := Result + s[Random(Length(s) - 1) + 1];
 end;
 
+procedure TFPrincipal.RectAlterarSenhaClick(Sender: TObject);
+begin
+  LayoutAlterarSenha.Visible := True;
+  img_cancelar.Visible := True;
+  img_salvar.Visible := True;
+  Img_favoritoSel.Visible := false;
+  img_favorito.Visible := false;
+
+end;
+
+procedure TFPrincipal.RectDecontarClick(Sender: TObject);
+begin
+  Close;
+end;
+
 procedure TFPrincipal.GerarSenha();
 begin
   editSenha.text := RandomPassword(FormatFloat('00', track_tamanho.Value)
     .ToInteger, sw_upper.IsChecked, sw_digits.IsChecked, sw_special.IsChecked);
+end;
+
+procedure TFPrincipal.img_esconder1Click(Sender: TObject);
+begin
+  if img_esconder1.Visible then
+  begin
+    img_esconder1.Visible := false;
+    img_exibir1.Visible := True;
+    EditSenhaAlterar.Password := false;
+  end
+  else
+  begin
+    img_esconder1.Visible := True;
+    img_exibir1.Visible := false;
+    EditSenhaAlterar.Password := True;
+  end;
+end;
+
+procedure TFPrincipal.img_exibir1Click(Sender: TObject);
+begin
+  if img_exibir1.Visible then
+  begin
+    img_exibir1.Visible := false;
+    img_esconder1.Visible := True;
+    EditSenhaAlterar.Password := True;
+  end
+  else
+  begin
+    img_exibir1.Visible := True;
+    img_esconder1.Visible := false;
+    editSenha.Password := false;
+  end;
 end;
 
 procedure TFPrincipal.Img_addCartaoClick(Sender: TObject);
@@ -214,28 +262,24 @@ begin
   ActTabDetalhe.Tag := TabControl.TabIndex + 1;
   // Soma +1 porque o index comeca em zero
 
-  // Esconde a busca caso esteja aberta...
-  FecharBusca;
-
   // Esconde painel de gerar senha aleatoria...
   layout_gerar_senha.Visible := false;
   lbl_gerar_senha.text := 'Gerar Nova';
 
   // img_logo.Visible := false;
-  img_cancelar.Visible := true;
-  img_salvar.Visible := true;
+  img_cancelar.Visible := True;
+  img_salvar.Visible := True;
   img_favorito.Align := TAlignLayout.None;
   img_favorito.Align := TAlignLayout.Right;
   Img_favoritoSel.Align := TAlignLayout.None;
   Img_favoritoSel.Align := TAlignLayout.Right;
-  img_favorito.Visible := true;
+  img_favorito.Visible := True;
   Img_favoritoSel.Visible := false;
-  img_busca.Visible := false;
   layout_cad_senha.Visible := false;
   layout_cad_cartao.Visible := false;
 
   lbl_titulo.text := 'Inserir Cartão';
-  layout_cad_cartao.Visible := true;
+  layout_cad_cartao.Visible := True;
   EditNome.text := EmptyStr;
   EditNum.text := EmptyStr;
   EditVencimento.text := EmptyStr;
@@ -252,12 +296,6 @@ begin
   ActTabDetalhe.Execute;
 end;
 
-procedure TFPrincipal.FecharBusca;
-begin
-  if AnimationBusca.Inverse then
-    AnimationBusca.Start;
-end;
-
 procedure TFPrincipal.DetalheItem(const Sender: TCustomListBox;
   const Item: TListBoxItem);
 var
@@ -267,23 +305,19 @@ begin
   ActTabDetalhe.Tag := TabControl.TabIndex + 1;
   // Soma +1 porque o index comeca em zero
 
-  // Esconde a busca caso esteja aberta...
-  FecharBusca;
-
   // Esconde painel de gerar senha aleatoria...
   layout_gerar_senha.Visible := false;
   lbl_gerar_senha.text := 'Gerar Nova';
 
   // img_logo.Visible := false;
-  img_cancelar.Visible := true;
-  img_salvar.Visible := true;
+  img_cancelar.Visible := True;
+  img_salvar.Visible := True;
   img_favorito.Align := TAlignLayout.None;
   img_favorito.Align := TAlignLayout.Right;
-  img_favorito.Visible := true;
+  img_favorito.Visible := True;
   Img_favoritoSel.Align := TAlignLayout.None;
   Img_favoritoSel.Align := TAlignLayout.Right;
   Img_favoritoSel.Visible := false;
-  img_busca.Visible := false;
 
   layout_cad_senha.Visible := false;
   layout_cad_cartao.Visible := false;
@@ -291,7 +325,7 @@ begin
   if Item.Tag = 1 then
   begin
     lbl_titulo.text := 'Editar Senha';
-    layout_cad_senha.Visible := true;
+    layout_cad_senha.Visible := True;
     EditDescricao.text := dm.FDQsenhadescricao.AsString;
     EditLogin.text := dm.FDQsenhalogin.AsString;
     editSenha.text := dm.FDQsenhasenha.AsString;
@@ -299,7 +333,7 @@ begin
   else if Item.Tag = 2 then
   begin
     lbl_titulo.text := 'Editar Cartão';
-    layout_cad_cartao.Visible := true;
+    layout_cad_cartao.Visible := True;
     EditNum.text := dm.FDQCartaonumero.AsString;
     EditNome.text := dm.FDQCartaonome.AsString;
     EditVencimento.text := dm.FDQCartaodatavalida.AsString;
@@ -316,19 +350,13 @@ begin
   ActTabDetalhe.Execute;
 end;
 
-procedure TFPrincipal.AnimationBuscaFinish(Sender: TObject);
-begin
-  AnimationBusca.Inverse := NOT AnimationBusca.Inverse;
-  rect_busca.Visible := AnimationBusca.Inverse;
-end;
-
 procedure TFPrincipal.img_cancelarClick(Sender: TObject);
 begin
   img_cancelar.Visible := false;
   img_favorito.Visible := false;
   Img_favoritoSel.Visible := false;
   img_salvar.Visible := false;
-  img_busca.Visible := true;
+  LayoutAlterarSenha.Visible := false;
   ListarPassword;
   ListarCard;
   ListarFavorito;
@@ -340,7 +368,7 @@ begin
     TAnimationType.&In, TInterpolationType.Circular);
 {$ENDIF}
   case ActTabDetalhe.Tag of
-    1:
+    0 .. 1:
       SelecionaAba(layout_aba1);
     2:
       SelecionaAba(layout_aba2);
@@ -395,12 +423,12 @@ begin
 
   while not dm.FDQFavoritos.Eof do
   begin
-    if dm.FDQFavoritostipo.AsInteger = 1 then
+    if dm.FDQFavoritostipo.AsString = '1' then
     begin
       AddFrame(lb_favorito, TTipoItem.Password, dm.FDQFavoritosid.AsString,
         dm.FDQFavoritosdescricao.AsString, dm.FDQFavoritoslogin.AsString);
     end
-    else if dm.FDQFavoritostipo.AsInteger = 2 then
+    else if dm.FDQFavoritostipo.AsString = '2' then
     begin
       AddFrame(lb_favorito, TTipoItem.Card, dm.FDQFavoritosid.AsString,
         dm.FDQFavoritosdescricao.AsString, dm.FDQFavoritoslogin.AsString);
@@ -455,10 +483,10 @@ begin
   img_tab3_sel.Visible := false;
   img_tab5_sel.Visible := false;
 
-  img_tab1.Visible := true;
-  img_tab2.Visible := true;
-  img_tab3.Visible := true;
-  img_tab5.Visible := true;
+  img_tab1.Visible := True;
+  img_tab2.Visible := True;
+  img_tab3.Visible := True;
+  img_tab5.Visible := True;
 
   AnimationSelecao.StopValue := TLayout(Sender).Position.X;
   AnimationSelecao.Start;
@@ -466,7 +494,7 @@ begin
   if TLayout(Sender).Tag = 1 then
   begin
     lbl_titulo.text := 'Favoritos';
-    img_tab1_sel.Visible := true;
+    img_tab1_sel.Visible := True;
     img_tab1.Visible := false;
     ActTab1.Execute;
   end;
@@ -474,7 +502,7 @@ begin
   if TLayout(Sender).Tag = 2 then
   begin
     lbl_titulo.text := 'Senhas';
-    img_tab2_sel.Visible := true;
+    img_tab2_sel.Visible := True;
     img_tab2.Visible := false;
     ActTab2.Execute;
   end;
@@ -482,7 +510,7 @@ begin
   if TLayout(Sender).Tag = 3 then
   begin
     lbl_titulo.text := 'Cartões';
-    img_tab3_sel.Visible := true;
+    img_tab3_sel.Visible := True;
     img_tab3.Visible := false;
     ActTab3.Execute;
   end;
@@ -490,7 +518,7 @@ begin
   if TLayout(Sender).Tag = 5 then
   begin
     lbl_titulo.text := 'Configurações';
-    img_tab5_sel.Visible := true;
+    img_tab5_sel.Visible := True;
     img_tab5.Visible := false;
     ActTab5.Execute;
   end;
@@ -511,9 +539,9 @@ end;
 
 procedure TFPrincipal.FormCreate(Sender: TObject);
 begin
-  dm.FDQFavoritos.Active := true;
-  dm.FDQCartao.Active := true;
-  dm.FDQsenha.Active := true;
+  dm.FDQFavoritos.Active := True;
+  dm.FDQCartao.Active := True;
+  dm.FDQsenha.Active := True;
   // Esconde icones...
   icone_password.Visible := false;
   icone_card.Visible := false;
@@ -521,7 +549,6 @@ begin
   img_favorito.Visible := false;
   Img_favoritoSel.Visible := false;
   img_salvar.Visible := false;
-  rect_busca.Visible := false;
 
   // Acerta tab selecionada...
   TabControl.ActiveTab := TabItem1;
@@ -533,7 +560,7 @@ begin
 {$IFDEF ANDROID}
   rect_abas.Align := TAlignLayout.Top;
   layout_slide.Align := TAlignLayout.Bottom;
-  //img_add.Position.Y := img_add.Position.Y + 50;
+  // img_add.Position.Y := img_add.Position.Y + 50;
 {$ELSE}
   rect_abas.Align := TAlignLayout.Bottom;
   layout_slide.Align := TAlignLayout.Top;
@@ -547,28 +574,23 @@ begin
   ActTabDetalhe.Tag := TabControl.TabIndex + 1;
   // Soma +1 porque o index comeca em zero
 
-  // Esconde a busca caso esteja aberta...
-  FecharBusca;
-
   // Esconde painel de gerar senha aleatoria...
   layout_gerar_senha.Visible := false;
   lbl_gerar_senha.text := 'Gerar Nova';
 
-  // img_logo.Visible := false;
-  img_cancelar.Visible := true;
-  img_salvar.Visible := true;
+  img_cancelar.Visible := True;
+  img_salvar.Visible := True;
   img_favorito.Align := TAlignLayout.None;
   img_favorito.Align := TAlignLayout.Right;
   Img_favoritoSel.Align := TAlignLayout.None;
   Img_favoritoSel.Align := TAlignLayout.Right;
-  img_favorito.Visible := true;
+  img_favorito.Visible := True;
   Img_favoritoSel.Visible := false;
-  img_busca.Visible := false;
   layout_cad_senha.Visible := false;
   layout_cad_cartao.Visible := false;
 
   lbl_titulo.text := 'Inserir Senha';
-  layout_cad_senha.Visible := true;
+  layout_cad_senha.Visible := True;
   EditDescricao.text := EmptyStr;
   EditLogin.text := EmptyStr;
   editSenha.text := EmptyStr;
@@ -584,37 +606,19 @@ begin
   ActTabDetalhe.Execute;
 end;
 
-procedure TFPrincipal.img_buscaClick(Sender: TObject);
-begin
-  rect_busca.Width := rect_toolbar.Width;
-  rect_busca.Position.Y := 0;
-  rect_busca.Position.X := rect_toolbar.Width;
-  rect_busca.Visible := true;
-
-  edt_busca.text := '';
-  AnimationBusca.StartValue := rect_busca.Position.X;
-  AnimationBusca.StopValue := 0;
-  AnimationBusca.Start;
-end;
-
-procedure TFPrincipal.img_cancel_buscaClick(Sender: TObject);
-begin
-  FecharBusca;
-end;
-
 procedure TFPrincipal.img_esconderClick(Sender: TObject);
 begin
   if img_esconder.Visible then
   begin
     img_esconder.Visible := false;
-    img_exibir.Visible := true;
+    img_exibir.Visible := True;
     editSenha.Password := false;
   end
   else
   begin
-    img_esconder.Visible := true;
+    img_esconder.Visible := True;
     img_exibir.Visible := false;
-    editSenha.Password := true;
+    editSenha.Password := True;
   end;
 end;
 
@@ -623,12 +627,12 @@ begin
   if img_exibir.Visible then
   begin
     img_exibir.Visible := false;
-    img_esconder.Visible := true;
-    editSenha.Password := true;
+    img_esconder.Visible := True;
+    editSenha.Password := True;
   end
   else
   begin
-    img_exibir.Visible := true;
+    img_exibir.Visible := True;
     img_esconder.Visible := false;
     editSenha.Password := false;
   end;
@@ -638,7 +642,7 @@ procedure TFPrincipal.img_favoritoClick(Sender: TObject);
 begin
   if img_favorito.Visible then
   begin
-    Img_favoritoSel.Visible := true;
+    Img_favoritoSel.Visible := True;
     Img_favoritoSel.Align := TAlignLayout.None;
     Img_favoritoSel.Align := TAlignLayout.Right;
     img_favorito.Visible := false;
@@ -648,7 +652,7 @@ begin
   begin
     img_favorito.Align := TAlignLayout.None;
     img_favorito.Align := TAlignLayout.Right;
-    img_favorito.Visible := true;
+    img_favorito.Visible := True;
     Img_favoritoSel.Visible := false;
   end;
 end;
@@ -661,7 +665,7 @@ begin
     img_favorito.Align := TAlignLayout.Right;
     Img_favoritoSel.Align := TAlignLayout.None;
     Img_favoritoSel.Align := TAlignLayout.Right;
-    img_favorito.Visible := true;
+    img_favorito.Visible := True;
     Img_favoritoSel.Visible := false;
   end
   else
@@ -671,7 +675,7 @@ begin
     Img_favoritoSel.Align := TAlignLayout.None;
     Img_favoritoSel.Align := TAlignLayout.Right;
     img_favorito.Visible := false;
-    Img_favoritoSel.Visible := true;
+    Img_favoritoSel.Visible := True;
   end;
 end;
 
@@ -743,12 +747,20 @@ begin
     dm.FDConnection1.CommitRetaining;
     ShowMessage('Salvo com sucesso!');
   end;
+  if EditSenhaAlterar.text <> EmptyStr then
+  begin
+    dm.FDQlogin.Edit;
+    dm.FDQloginsenha.text := EditSenhaAlterar.text;
+    dm.FDQlogin.Post;
+    dm.FDConnection1.CommitRetaining;
+    ShowMessage('Salvo com sucesso!');
+  end;
   img_cancelar.Visible := false;
   img_favorito.Visible := false;
   Img_favoritoSel.Visible := false;
   img_salvar.Visible := false;
-  img_busca.Visible := true;
-  img_sem_senha.Visible := true;
+  img_sem_senha.Visible := True;
+  LayoutAlterarSenha.Visible := false;
   ListarPassword;
   ListarFavorito;
   ListarCard;
@@ -760,7 +772,7 @@ begin
     TAnimationType.&In, TInterpolationType.Circular);
 {$ENDIF}
   case ActTabDetalhe.Tag of
-    1:
+    0 .. 1:
       SelecionaAba(layout_aba1);
     2:
       SelecionaAba(layout_aba2);
@@ -794,7 +806,7 @@ begin
   if lbl_gerar_senha.text = 'Gerar Nova' then
   begin
     lbl_gerar_senha.text := 'Fechar';
-    layout_gerar_senha.Visible := true;
+    layout_gerar_senha.Visible := True;
   end
   else
   begin

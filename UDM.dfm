@@ -137,12 +137,19 @@ object DM: TDM
       Origin = 'login'
       Size = 50
     end
-    object FDQFavoritostipo: TLargeintField
+    object FDQFavoritostipo: TWideStringField
       AutoGenerateValue = arDefault
       FieldName = 'tipo'
       Origin = 'tipo'
       ProviderFlags = []
       ReadOnly = True
+      Size = 32767
+    end
+    object FDQFavoritosfavorito: TStringField
+      FieldName = 'favorito'
+      Origin = 'favorito'
+      FixedChar = True
+      Size = 1
     end
   end
 end

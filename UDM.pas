@@ -31,8 +31,9 @@ type
     FDQFavoritosid: TFDAutoIncField;
     FDQFavoritosdescricao: TStringField;
     FDQFavoritoslogin: TStringField;
-    FDQFavoritostipo: TLargeintField;
     FDQCartaodatavalida: TStringField;
+    FDQFavoritostipo: TWideStringField;
+    FDQFavoritosfavorito: TStringField;
     procedure FDConnection1BeforeConnect(Sender: TObject);
     procedure FDConnection1AfterConnect(Sender: TObject);
   private
