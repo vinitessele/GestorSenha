@@ -31,7 +31,7 @@
     <Transaction>2020/06/24 11:36:23.000.644,C:\Users\vinic\Documents\Embarcadero\Studio\Projects\AppGestorSenhas\UDM.dfm=C:\Users\vinic\Documents\Embarcadero\Studio\Projects\AppGestorSenhas\Unit1.dfm</Transaction>
   </Transactions>
 	<ActiveMobileDevice>
-		<NoProfile Android="RQ8M30LNNQB" iOSSimulator="iPhone5" Android64=""/>
+		<NoProfile Android="" iOSSimulator="iPhone5" Android64=""/>
 		<PMACANDREA iOSSimulator="iPhone5"/>
 		<PMacBook iOSSimulator="iPhone5"/>
 		<PMacVirtual iOSSimulator="iPhone5"/>

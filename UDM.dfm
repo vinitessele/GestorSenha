@@ -29,9 +29,10 @@ object DM: TDM
     end
   end
   object FDQsenha: TFDQuery
+    Active = True
     Connection = FDConnection1
     SQL.Strings = (
-      'select * from senha order by favorito')
+      'select * from senha')
     Left = 200
     Top = 24
     object FDQsenhaid: TFDAutoIncField
@@ -110,13 +111,13 @@ object DM: TDM
     Connection = FDConnection1
     SQL.Strings = (
       
-        'select 1 as tipo, senha.id, descricao, login, favorito from senh' +
-        'a '
+        'select '#39'1'#39' as tipo, senha.id, descricao, login, favorito from se' +
+        'nha '
       'where favorito = '#39'S'#39
       'union'
       
-        'select 2  as tipo, cartao.id, nome, numero, favorito from cartao' +
-        ' '
+        'select '#39'2'#39'  as tipo, cartao.id, nome, numero, favorito from cart' +
+        'ao '
       'where favorito = '#39'S'#39)
     Left = 88
     Top = 104
@@ -137,6 +138,12 @@ object DM: TDM
       Origin = 'login'
       Size = 50
     end
+    object FDQFavoritosfavorito: TStringField
+      FieldName = 'favorito'
+      Origin = 'favorito'
+      FixedChar = True
+      Size = 1
+    end
     object FDQFavoritostipo: TWideStringField
       AutoGenerateValue = arDefault
       FieldName = 'tipo'
@@ -145,11 +152,10 @@ object DM: TDM
       ReadOnly = True
       Size = 32767
     end
-    object FDQFavoritosfavorito: TStringField
-      FieldName = 'favorito'
-      Origin = 'favorito'
-      FixedChar = True
-      Size = 1
-    end
+  end
+  object FDQConfig: TFDQuery
+    Connection = FDConnection1
+    Left = 184
+    Top = 104
   end
 end

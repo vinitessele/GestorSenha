@@ -326,18 +326,22 @@ begin
   begin
     lbl_titulo.text := 'Editar Senha';
     layout_cad_senha.Visible := True;
+    dm.FDQsenha.Locate('id', Item.TagString, []);
     EditDescricao.text := dm.FDQsenhadescricao.AsString;
     EditLogin.text := dm.FDQsenhalogin.AsString;
     editSenha.text := dm.FDQsenhasenha.AsString;
+    dm.FDQsenha.Edit;
   end
   else if Item.Tag = 2 then
   begin
     lbl_titulo.text := 'Editar Cartão';
     layout_cad_cartao.Visible := True;
+    dm.FDQsenha.Locate('id', Item.TagString, []);
     EditNum.text := dm.FDQCartaonumero.AsString;
     EditNome.text := dm.FDQCartaonome.AsString;
     EditVencimento.text := dm.FDQCartaodatavalida.AsString;
     EditCVV.text := dm.FDQCartaocvv.AsString;
+    dm.FDQCartao.Edit;
   end;
 
 {$IFDEF ANDROID}
@@ -385,7 +389,7 @@ var
   f: TFrmFrame;
 begin
   Item := TListBoxItem.Create(nil);
-  Item.text := '';
+  Item.text := EmptyStr;
   Item.Height := 77;
   Item.Align := TAlignLayout.Client;
   Item.TagString := cod_item;
@@ -542,6 +546,7 @@ begin
   dm.FDQFavoritos.Active := True;
   dm.FDQCartao.Active := True;
   dm.FDQsenha.Active := True;
+
   // Esconde icones...
   icone_password.Visible := false;
   icone_card.Visible := false;
@@ -646,7 +651,6 @@ begin
     Img_favoritoSel.Align := TAlignLayout.None;
     Img_favoritoSel.Align := TAlignLayout.Right;
     img_favorito.Visible := false;
-
   end
   else
   begin
